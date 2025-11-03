@@ -6,10 +6,12 @@
  user
  (:deps)
  (user_id auto (#:primary-key))
- (username char-field (#:maxlen 64 #:unique #:not-null))
- (password-hash char-field (#:maxlen 64 #:not-null)) ; SHA-256 hex
- (salt char-field (#:maxlen 32 #:not-null))
- (email char-field (#:maxlen 128))
+ ;; User status: 0:normal, 1:pro, 2:super, 3:admin, 4:banned
+ (status smallint (#:unsigned #:not-null))
  (created_at bigint (#:unsigned #:not-null))
  (last_login bigint (#:unsigned #:not-null))
+ (salt char-field (#:maxlen 32 #:not-null))
+ (username char-field (#:maxlen 64 #:unique #:not-null))
+ (password-hash char-field (#:maxlen 64 #:not-null)) ; SHA-256 hex
+ (email char-field (#:maxlen 128))
  )

@@ -6,7 +6,7 @@
  tag
  (:deps)
  (tag_id auto (#:primary-key))
- (tag_name char-field (#:maxlen 100 #:not-null #:unique))
+ (tag_name char-field (#:maxlen 32 #:not-null #:unique))
  (created_at bigint (#:unsigned #:not-null))
  (status tinyint (#:not-null)) ; 0: inactive, 1: active, 2: forbidden
  ) ; DO NOT REMOVE THIS LINE!!!
