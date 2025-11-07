@@ -10,20 +10,20 @@
 (create-artanis-model
  api_key
  (:deps user)
- ((id auto (#:primary-key))
-  (user_id int (#:not-null))
-  ;; 0=invalid, 1=valid
-  (valid boolean (#:no-null))
-  (created_at bigint (#:not-null))
-  (expires_at bitint (#:not-null))
-  (salt char-field (#:maxlen 8 #:not-null))
-  (pre char-field (#:maxlen 16 #:not-null))
-  ;; hash is a sha256 hash of (pre + body + salt + policy)
-  (hash char-field (#:maxlen 64 #:unique #:not-null))
-  (policy text (#:not-null))
-  (:indexes
-   (#:unique hash_index hash)
-   (#:unique user_id_index user_id)))
+ (id auto (#:primary-key))
+ (user_id int (#:not-null))
+ ;; 0=invaluid, 1=valid
+ (valid boolean (#:no-null))
+ (created_at bigint (#:not-null))
+ (expires_at bitint (#:not-null))
+ (salt char-field (#:maxlen 8 #:not-null))
+ (pre char-field (#:maxlen 16 #:not-null))
+ ;; hash is a sha256 hash of (pre + body + salt + policy)
+ (hash char-field (#:maxlen 64 #:unique #:not-null))
+ (policy text (#:not-null))
+ (:indexes
+  (#:unique hash_index hash)
+  (#:unique user_id_index user_id))
  ); DO NOT REMOVE THIS LINE!!!
 
 ;; ash-key-<pre>-<body>
@@ -79,10 +79,12 @@
         (cond
          ((get-policy-if-api-key-valid pre body)
           => (lambda (policy)
-               (polich-check (string-split policy #:\,) rc)))
+               (if (policy-check (string-split policy #:\,) rc)
+                   'authorized
+                   'policy-denied)))
          (else
           ;; Invalid key
-          #f)))))
+          'invalid-key)))))
    (else
     ;; Invalid format
-    #f)))
+    'invalid-format)))
