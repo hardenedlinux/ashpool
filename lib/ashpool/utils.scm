@@ -18,7 +18,19 @@
 (define-module (ashpool utils)
   #:use-module (artanis route)
   #:use-module (artanis third-party json)
-  #:export (get-json-from-rc))
+  #:use-module (artanis tpl)
+  #:use-module (artanis config)
+  #:use-module (artanis utils)
+  #:export (get-json-from-rc
+            send-auto-mail
+            gen-pw-hash))
 
 (define (get-json-from-rc rc)
   (json-string->scm (bytevector->string (rc-body rc) "utf-8")))
+
+(define (send-auto-mail to subject)
+  (let ((from ((get-conf '(custom mail-from)))))
+    (make-simple-mail-sender from to #:subject subject)))
+
+(define (gen-pw-hash username password salt)
+  (string->sha256 (string-concatenate (list username password salt))))

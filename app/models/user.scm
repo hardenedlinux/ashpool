@@ -6,17 +6,24 @@
  user
  (:deps)
  (user_id auto (#:primary-key))
- ;; User status: 0:normal, 1:pro, 2:super, 3:admin, 4:banned, 5:unverified
+ ;; Status: 0:free, 1:pro, 2:business, 3:admin, 4:banned, 5:unverified
  (status smallint (#:unsigned #:not-null))
  (created_at bigint (#:unsigned #:not-null))
  (last_login bigint (#:unsigned #:not-null))
  (salt char-field (#:maxlen 32 #:not-null))
- (username char-field (#:maxlen 64 #:unique #:not-null))
- (password-hash char-field (#:maxlen 64 #:not-null)) ; SHA-256 hex
- (email char-field (#:maxlen 128 #:unique #:not-null))
- )
+ ;; we store username in base64
+ (username_base64 char-field (#:maxlen 64 #:unique #:not-null))
+ ;; password_hash is SHA-256 hex digest of (username + password + salt)
+ (password_hash char-field (#:maxlen 64 #:not-null)) ; SHA-256 hex
+ ;; we don't store email addresses directly
+ ;; email_hash = base64(uri-encode(email))
+ (email_base64 char-field (#:maxlen 512 #:unique #:not-null))
+ (indexes
+  (email_index (email))
+  (username_index (username))
+  (last_login_index (last_login))))
 
-(define-public user:normal 0)
+(define-public user:free 0)
 (define-public user:pro 1)
 (define-public user:super 2)
 (define-public user:admin 3)

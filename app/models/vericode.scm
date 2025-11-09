@@ -29,7 +29,7 @@
  (email_hash char-field (#:maxlen 64 #:not-null))
  (activated bool (#:not-null))
  (:indexes
-  (email_hash_index (email_hash)))
+  (vericode_index (email_hash code)))
  ) ; DO NOT REMOVE THIS LINE!!!
 
 (::define (verify-activate-code rc code email)
