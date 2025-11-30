@@ -11,16 +11,17 @@
  (created_at bigint (#:unsigned #:not-null))
  (last_login bigint (#:unsigned #:not-null))
  (salt char-field (#:maxlen 32 #:not-null))
- ;; we store username in base64
- (username_base64 char-field (#:maxlen 64 #:unique #:not-null))
+ ;; we store username in base32
+ (username_base32 char-field (#:maxlen 64 #:unique #:not-null))
  ;; password_hash is SHA-256 hex digest of (username + password + salt)
  (password_hash char-field (#:maxlen 64 #:not-null)) ; SHA-256 hex
  ;; we don't store email addresses directly
  ;; email_hash = base64(uri-encode(email))
- (email_base64 char-field (#:maxlen 512 #:unique #:not-null))
+ (email_base32 char-field (#:maxlen 512 #:unique #:not-null))
+
  (indexes
   (email_index (email))
-  (username_index (username))
+  (username_index (username_base32))
   (last_login_index (last_login))))
 
 (define-public user:free 0)

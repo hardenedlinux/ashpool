@@ -24,7 +24,7 @@
         (artanis runner)
         (artanis irregex)
         (artanis third-party json)
-        (artanis security nss)
+        (artanis security hash)
         (ice-9 iconv)
         (ashpool utils)
         (web uri)
@@ -53,7 +53,7 @@
    (let* ((email (uri-decode (params rc "email")))
           (code (params rc "code"))
           (email_hash (string->sha256 email))
-          (email_base64 (nss:base64-encode email)))
+          (email_base32 (base32-encode email)))
      (cond
       (($vericode 'get '(activated)
                   #:conditions (where #:code code #:email_hash email_hash))
@@ -64,7 +64,7 @@
                 (with-transaction
                  rc
                  ($user 'set #:status user:free
-                        #:conditions (where #:email_base64 email_base64))
+                        #:conditions (where #:email_base32 email_base32))
                  ($vericode 'set #:activated 1
                             #:conditions (where #:code code #:email_hash email_hash))))
                (else
@@ -76,13 +76,14 @@
 
 (signup-define
  "submit"
+ (options #:method 'post)
  (lambda (rc)
    (let* ((data (get-json-from-rc rc))
-          (username_base64 (nss:base64-encode (json-ref data "username")))
+          (username_base32 (base32-encode (json-ref data "username")))
           (password (json-ref data "password"))
           (email (json-ref data "email"))
           (email_hash (string->sha256 email))
-          (email_base64 (nss:base64-encode (uri-encode email)))
+          (email_base32 (base32-encode (uri-encode email)))
           (salt (get-random-from-dev #:length 32))
           (password_hash (gen-pw-hash username password salt)))
      (when (not (verify-password password))
@@ -93,9 +94,9 @@
         rc
         ($vericode 'set #:code code #:email_hash email_hash
                    #:activated 0)
-        ($user 'set #:username_base64 username_base64
+        ($user 'set #:username_base32 username_base32
                #:password password_hash
-               #:email_base64 email_base64
+               #:email_base32 email_base32
                #:status user:unverified
                #:salt salt
                #:created-at (current-time)))
@@ -104,6 +105,6 @@
        (call-with-runner
         (lambda ()
           ((send-auto-mail email)
-           #:subject "[No Reply] Please verify your email address!"
            (format #f "Please click the link to verify your email:~%~%~a~%"
-                   (gen-verification-link code email)))))))))
+                   (gen-verification-link code email))
+           #:subject "[No Reply] Please verify your email address!")))))))

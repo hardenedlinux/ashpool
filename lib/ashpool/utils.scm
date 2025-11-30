@@ -21,9 +21,11 @@
   #:use-module (artanis tpl)
   #:use-module (artanis config)
   #:use-module (artanis utils)
+  #:use-module (ice-9 ftw)
   #:export (get-json-from-rc
             send-auto-mail
-            gen-pw-hash))
+            gen-pw-hash
+            include-all-apis))
 
 (define (get-json-from-rc rc)
   (json-string->scm (bytevector->string (rc-body rc) "utf-8")))
@@ -34,3 +36,17 @@
 
 (define (gen-pw-hash username password salt)
   (string->sha256 (string-concatenate (list username password salt))))
+
+(define *api-re* (irregex "*.scm$"))
+(define (get-all-apis path)
+  (scandir
+   (format #f "~a/app/api/~a/" (current-toplevel) path)
+   (lambda (entry)
+     (and (irregex-match *api-re* entry)
+          entry))))
+
+(define (include-all-apis path)
+  (for-each (lambda (file)
+              (DEBUG "Including API file: ~a" file)
+              (include file))
+            (get-all-apis path)))
