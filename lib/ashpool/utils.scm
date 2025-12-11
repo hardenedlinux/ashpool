@@ -22,10 +22,12 @@
   #:use-module (artanis config)
   #:use-module (artanis utils)
   #:use-module (ice-9 ftw)
+  #:use-module (ice-9 iconv)
   #:export (get-json-from-rc
             send-auto-mail
             gen-pw-hash
-            include-all-apis))
+            include-all-apis
+            get-json-from-rc))
 
 (define (get-json-from-rc rc)
   (json-string->scm (bytevector->string (rc-body rc) "utf-8")))
@@ -50,3 +52,6 @@
               (DEBUG "Including API file: ~a" file)
               (include file))
             (get-all-apis path)))
+
+(define (get-json-from-rc rc)
+  (json-string->scm (bytevector->string (rc-body rc) "utf-8")))

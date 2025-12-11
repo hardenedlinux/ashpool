@@ -15,14 +15,17 @@
 ;;  along with this program.
 ;;  If not, see <http://www.gnu.org/licenses/>.
 
-;; ALBA API - simple article operations
+(define-module (ashpool enum)
+  #:use-module (rnrs)
+  #:export (status-enum
+            tag-status))
 
-;; NOTE: This file was included into api module, please don't import any
-;;       module here for avoiding redundant dependencies.
+(define *api-status-enum*
+  (make-enumeration
+   '(ok failed)))
+(define status-enum (enum-set-indexier *api-status-enum*))
 
-(api-define
-    "alba/article/create"
-  (options #:method 'post #:with-auth api-key-auth-config)
-  (lambda (rc)
-    
-    ))
+(define *tag-status*
+  (make-enumeration
+   '(inactive active forbbidden)))
+(define tag-status (enum-set-indexier *tag-status*))
